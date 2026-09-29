@@ -1,217 +1,158 @@
-# SentinelOps
+# 🔴 SENTINELOPS
 
-Laboratorio personal de monitorización de infraestructura Linux desarrollado con Docker Compose, Prometheus, Grafana y Node Exporter.
+### Laboratorio de observabilidad de infraestructura Linux
 
-SentinelOps permite visualizar métricas del sistema Linux, incluyendo uso de CPU, memoria RAM, almacenamiento y tráfico de red.
+**Visualiza el sistema. Entiende la señal.**
 
-[English](README.md) | [Español](README.es.md)
+Laboratorio de monitorización autohospedado y reproducible para Linux, desarrollado con Docker Compose, Prometheus, Grafana y Node Exporter.
 
-## Descripción
+[![Docker Compose](https://img.shields.io/badge/Docker_Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](compose.yaml) [![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat-square&logo=prometheus&logoColor=white)](prometheus/prometheus.yml) [![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat-square&logo=grafana&logoColor=white)](grafana/)
 
-El proyecto está enfocado en la observabilidad de infraestructura, despliegue de servicios mediante contenedores y aplicación de medidas básicas de seguridad.
+[🇬🇧 English](README.md) · [Arquitectura](#-arquitectura) · [Instalación rápida](#-instalación-rápida) · [Seguridad](#-seguridad)
 
-### Características
+---
 
-- Monitorización de CPU, RAM, disco y red.
-- Recopilación de métricas mediante Prometheus cada 15 segundos.
-- Dashboard de Grafana provisionado desde un archivo JSON versionado.
-- Almacenamiento persistente para Prometheus y Grafana.
-- Red bridge dedicada de Docker.
-- Prometheus y Grafana accesibles únicamente desde localhost.
-- Node Exporter configurado con montajes de solo lectura y capacidades Linux reducidas.
-- Configuración de la contraseña de administrador de Grafana mediante variables de entorno.
+## ◈ Objetivo
 
-## Arquitectura
+SentinelOps ofrece visibilidad centralizada de un host Linux. Node Exporter expone métricas, Prometheus las recopila y almacena, y Grafana las presenta en un dashboard provisionado desde configuración versionada.
 
-```text
-Host Linux
-    |
-Docker Compose
-    |
-Red bridge monitoring
-    |
-    +----------------+----------------+
-    |                |                |
-Prometheus         Grafana       Node Exporter
-:9090              :3000             :9100
-    |                |                 |
-    |                |            Métricas del host
-    |                |
-    +------------ Fuente de datos
-                     |
-              Dashboard Grafana
-```
+> **Tipo:** Laboratorio educativo personal · **Despliegue:** Docker Compose · **Enfoque:** Linux, observabilidad y operaciones de infraestructura
 
-## Tecnologías
+## ◈ Funcionalidades
 
-- Arch Linux
-- Docker Engine
-- Docker Compose
-- Prometheus
-- Grafana
-- Node Exporter
-- PromQL
-- YAML
-- JSON
-
-## Dashboard
-
-El dashboard contiene seis paneles:
-
-| Panel | Descripción |
+| Área | Implementación |
 |---|---|
-| CPU Usage | Utilización de CPU del host |
-| Memory Usage | Utilización de memoria RAM |
-| Root Filesystem Usage | Espacio utilizado en el sistema de archivos raíz |
-| Network Receive | Tráfico de entrada en `ens33` |
-| Network Transmit | Tráfico de salida en `ens33` |
-| Node Exporter Status | Disponibilidad de Node Exporter |
+| Métricas del host | CPU, RAM, filesystem y red |
+| Recopilación | Prometheus · intervalo de 15 segundos |
+| Visualización | Dashboard Grafana provisionado desde JSON |
+| Persistencia | Volúmenes Docker |
+| Exposición | Grafana y Prometheus vinculados a `127.0.0.1` |
+| Hardening | Node Exporter con filesystem de solo lectura, capacidades eliminadas y `no-new-privileges` |
+| Configuración | YAML y contraseña de administrador mediante entorno |
 
-![Dashboard de SentinelOps](screenshots/03-sentinelops-dashboard.png)
+## ◈ Dashboard
 
-## Estructura del proyecto
+<div align="center">
+
+![Dashboard de Grafana de SentinelOps](screenshots/03-sentinelops-dashboard.png)
+
+*Métricas del host en una única vista de Grafana.*
+
+</div>
+
+### Evidencias
+
+| Objetivos de Prometheus | Fuente de datos de Grafana |
+|---|---|
+| ![Objetivos de Prometheus](screenshots/01-prometheus-targets.png) | ![Fuente de datos de Grafana](screenshots/02-grafana-datasource.png) |
+
+## ◈ Arquitectura
 
 ```text
-SentinelOps/
-├── compose.yaml
-├── prometheus/
-│   └── prometheus.yml
-├── grafana/
-│   ├── dashboards/
-│   │   └── sentinelops.json
-│   └── provisioning/
-│       └── dashboards/
-│           └── provider.yml
-├── screenshots/
-├── .env.example
-├── .gitignore
-└── README.md
+                         HOST LINUX
+                             │
+                       DOCKER COMPOSE
+                             │
+                    Red bridge monitoring
+              ┌──────────────┼──────────────┐
+              │              │              │
+         Prometheus        Grafana     Node Exporter
+           :9090            :3000          :9100
+              │              ▲              │
+              └── métricas ──┘         métricas host
+                             │
+                    Dashboard provisionado
 ```
 
-## Requisitos
+## ◈ Instalación rápida
 
-- Sistema Linux con Docker Engine y Docker Compose.
-- Git.
-- Puertos locales `3000` y `9090` disponibles.
-- Permisos para ejecutar comandos Docker.
+### Requisitos
+- Host Linux con Docker Engine y Docker Compose
+- Git
+- Puertos locales `3000` y `9090` disponibles
 
-## Instalación
-
-### 1. Clonar el repositorio
-
+### 1 — Clonar
 ```bash
-git clone <REPOSITORY_URL>
+git clone https://github.com/KyyroxxX/SentinelOps.git
 cd SentinelOps
 ```
 
-### 2. Configurar Grafana
-
+### 2 — Configurar credenciales
 ```bash
 cp .env.example .env
 ```
+Edita `.env` y establece una contraseña robusta y única para el administrador de Grafana. No subas `.env` a Git.
 
-Edita `.env` y sustituye la contraseña de ejemplo por una contraseña única y robusta.
-
-No subas el archivo `.env` a Git.
-
-### 3. Iniciar los servicios
-
-```bash
-docker compose up -d
-```
-
-### 4. Comprobar el estado de los contenedores
-
-```bash
-docker compose ps
-```
-
-### 5. Acceder a los servicios
-
-| Servicio | URL |
-|---|---|
-| Grafana | http://localhost:3000 |
-| Prometheus | http://localhost:9090 |
-
-Usuario de Grafana: `admin`
-
-Contraseña: la configurada en `.env`.
-
-## Configuración
-
-### Prometheus
-
-Archivo de configuración: `prometheus/prometheus.yml`
-
-- Intervalo de scraping: 15 segundos.
-- Intervalo de evaluación: 15 segundos.
-- Objetivos: Prometheus y Node Exporter.
-- Retención de datos: 7 días.
-
-### Grafana
-
-El dashboard se provisiona desde `grafana/dashboards/sentinelops.json`.
-
-Al estar provisionado desde un archivo, las modificaciones deben realizarse en el JSON del proyecto, en lugar de guardarse desde la interfaz web de Grafana.
-
-Los datos de Grafana se almacenan en un volumen persistente de Docker.
-
-## Medidas de seguridad
-
-- Los puertos de Grafana y Prometheus están vinculados a `127.0.0.1`.
-- Los servicios se comunican mediante una red bridge dedicada.
-- Node Exporter utiliza un sistema de archivos de contenedor de solo lectura.
-- Node Exporter elimina capacidades Linux y activa `no-new-privileges`.
-- Los montajes del sistema de archivos y recursos del host son de solo lectura.
-- El registro público de usuarios de Grafana está deshabilitado.
-- Las credenciales se proporcionan mediante un archivo de entorno excluido de Git.
-
-Node Exporter necesita acceso a recursos del host para recopilar métricas. Sus privilegios y montajes deben revisarse antes de utilizar esta configuración en producción.
-
-Este proyecto está diseñado como laboratorio local de monitorización, no como despliegue preparado para producción.
-
-## Comandos útiles
-
-Iniciar servicios:
-
-```bash
-docker compose up -d
-```
-
-Consultar estado:
-
-```bash
-docker compose ps
-```
-
-Consultar logs:
-
-```bash
-docker compose logs -f
-```
-
-Detener servicios sin eliminar los datos persistentes:
-
-```bash
-docker compose down
-```
-
-Validar la configuración de Compose:
-
+### 3 — Validar e iniciar
 ```bash
 docker compose config -q
+docker compose up -d
+docker compose ps
 ```
 
-## Capturas
+### 4 — Acceder
+| Servicio | Dirección local | Autenticación |
+|---|---|---|
+| Grafana | [localhost:3000](http://localhost:3000) | `admin` / contraseña de `.env` |
+| Prometheus | [localhost:9090](http://localhost:9090) | Sin autenticación configurada |
 
-| Componente | Captura |
+## ◈ Estructura
+```text
+SentinelOps/
+├── compose.yaml
+├── prometheus/prometheus.yml
+├── grafana/
+│   ├── dashboards/sentinelops.json
+│   └── provisioning/
+├── screenshots/
+├── .env.example
+├── .gitignore
+├── README.md
+└── README.es.md
+```
+
+## ◈ Comandos de operación
+| Tarea | Comando |
 |---|---|
-| Objetivos de Prometheus | `screenshots/01-prometheus-targets.png` |
-| Fuente de datos de Grafana | `screenshots/02-grafana-datasource.png` |
-| Dashboard de monitorización | `screenshots/03-sentinelops-dashboard.png` |
+| Estado | `docker compose ps` |
+| Seguir logs | `docker compose logs -f` |
+| Reiniciar | `docker compose restart` |
+| Detener conservando datos | `docker compose down` |
+| Validar Compose | `docker compose config -q` |
 
-## Aviso
+Para eliminar también los datos persistentes, ejecuta `docker compose down -v`. **Esto borra los datos de los volúmenes.**
 
-SentinelOps es un proyecto educativo personal desarrollado para practicar monitorización de infraestructura Linux, administración de Docker y observabilidad.
+## ◈ Configuración
+- Configuración Prometheus: `prometheus/prometheus.yml`
+- Intervalos de scraping/evaluación: 15 segundos
+- Retención: 7 días
+- Fuente del dashboard: `grafana/dashboards/sentinelops.json`
+- El dashboard se provisiona desde archivo; modifica su JSON en Git.
+- Grafana y Prometheus solo se publican en loopback.
 
-No pretende sustituir una plataforma de monitorización o seguridad destinada a producción.
+## ◈ Seguridad
+- Mantén `.env` privado; usa `.env.example` para valores ficticios.
+- Las interfaces web están pensadas para acceso local, no para exposición pública directa.
+- Node Exporter necesita visibilidad del host para recopilar métricas. Revisa sus montajes y permisos antes de adaptar el proyecto.
+- Este repositorio es un laboratorio de aprendizaje, **no una plataforma endurecida para producción**.
+
+## ◈ Hoja de ruta
+- [x] Stack de monitorización con Docker Compose
+- [x] Recopilación Prometheus y provisioning de Grafana
+- [x] Persistencia de métricas y datos del dashboard
+- [x] Interfaces web limitadas a localhost
+- [x] Documentación y capturas
+- [ ] Validación CI de Compose y configuraciones
+- [ ] Demo reproducible paso a paso
+- [ ] Reglas de alertas y casos de prueba documentados
+
+---
+
+<div align="center">
+
+**Creado por [KyyroxxX](https://github.com/KyyroxxX)**  
+Linux · Infraestructura · Observabilidad
+
+<sub>Construye para aprender. Mide lo que importa.</sub>
+
+</div>
