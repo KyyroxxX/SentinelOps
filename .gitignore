@@ -3,3 +3,6 @@
 !.env.example
 *.bak*
 __pycache__/
+
+# Disabled local Grafana datasource configuration
+grafana/provisioning/datasources/prometheus.yml.disabled
